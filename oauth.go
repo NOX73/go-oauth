@@ -7,7 +7,7 @@ import(
 type Credentials struct {
 }
 
-func (c *Credentials) Nonce() (string, error) {
+func GenerateNonce() (string, error) {
   var bytes [32]byte
 
   for i:=0;i!=32;i++ {

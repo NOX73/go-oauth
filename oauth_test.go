@@ -12,8 +12,7 @@ type OAuthSuite struct{}
 var _ = Suite(&OAuthSuite{})
 
 func (s *OAuthSuite) TestGenerateNonce(c *C) {
-  credentials := new(Credentials)
-  nonce, err := credentials.Nonce()
+  nonce, err := GenerateNonce()
 
   c.Assert(err, IsNil)
   c.Assert(len(nonce), Equals, 32)
