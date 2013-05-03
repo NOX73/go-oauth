@@ -28,9 +28,19 @@ func NewCredentials(oauth_consumer_key, oauth_token string) *Credentials{
 func GenerateNonce() string {
   var bytes [32]byte
 
-  for i:=0;i!=32;i++ {
-    bytes[i] = byte(rand.Int63n(122 - 48) + 48)
+  var b int64
+  for i := 0; i != 32; i++ {
+    b = rand.Int63n(62)
+    switch {
+    case b < 10:
+      b += 48
+    case b < 36:
+      b += 55
+    default:
+      b += 61
+    }
+    bytes[i] = byte(b)
   }
-
+                                                
   return string(bytes[:32])
 }
