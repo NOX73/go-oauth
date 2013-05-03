@@ -20,16 +20,17 @@ func NewCredentials(oauth_consumer_key, oauth_token string) *Credentials{
     oauth_token: oauth_token,
     oauth_version: "1.0",
     oauth_signature_method: "HMAC-SHA1",
+    oauth_nonce: GenerateNonce(),
   }
   return &c
 }
 
-func GenerateNonce() (string, error) {
+func GenerateNonce() string {
   var bytes [32]byte
 
   for i:=0;i!=32;i++ {
     bytes[i] = byte(rand.Int63n(122 - 48) + 48)
   }
 
-  return string(bytes[:32]), nil 
+  return string(bytes[:32])
 }

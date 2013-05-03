@@ -17,9 +17,8 @@ func (s *OAuthSuite) SetUpTest(c *C) {
 }
 
 func (s *OAuthSuite) TestGenerateNonce(c *C) {
-  nonce, err := GenerateNonce()
+  nonce := GenerateNonce()
 
-  c.Assert(err, IsNil)
   c.Assert(len(nonce), Equals, 32)
 }
 
@@ -33,5 +32,6 @@ func (s *OAuthSuite) TestNewCredentials(c *C) {
   c.Assert(credentials.oauth_token, Equals, oauth_token)
   c.Assert(credentials.oauth_signature_method, Equals, "HMAC-SHA1")
   c.Assert(credentials.oauth_version, Equals, "1.0")
+  c.Assert(credentials.oauth_nonce, Not(Equals), "")
 }
  
