@@ -2,6 +2,7 @@ package oauth
 
 import(
   "math/rand"
+  "time"
 )
 
 type Credentials struct {
@@ -9,7 +10,7 @@ type Credentials struct {
   oauth_nonce string
   oauth_signature string
   oauth_signature_method string
-  oauth_timestamp int32
+  oauth_timestamp int64
   oauth_token string
   oauth_version string
 }
@@ -21,6 +22,7 @@ func NewCredentials(oauth_consumer_key, oauth_token string) *Credentials{
     oauth_version: "1.0",
     oauth_signature_method: "HMAC-SHA1",
     oauth_nonce: GenerateNonce(),
+    oauth_timestamp: time.Now().UTC().Unix(),
   }
   return &c
 }

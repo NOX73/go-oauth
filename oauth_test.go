@@ -33,5 +33,6 @@ func (s *OAuthSuite) TestNewCredentials(c *C) {
   c.Assert(credentials.oauth_signature_method, Equals, "HMAC-SHA1")
   c.Assert(credentials.oauth_version, Equals, "1.0")
   c.Assert(credentials.oauth_nonce, Not(Equals), "")
+  c.Assert(credentials.oauth_timestamp, Not(Equals), 0)
 }
  
