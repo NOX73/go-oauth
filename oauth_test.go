@@ -3,17 +3,32 @@ package oauth
 import (
   . "launchpad.net/gocheck"
   "testing"
+  //"fmt"
+  //"net/http"
+  //"strings"
 )
 
 // Hook up gocheck into the "go test" runner.
 func Test(t *testing.T) { TestingT(t) }
 type OAuthSuite struct{
   credentials *Credentials
+  method string
+  url string
+  form_value FormValue
 }
 var _ = Suite(&OAuthSuite{})
 
 func (s *OAuthSuite) SetUpTest(c *C) {
-  s.credentials = new(Credentials)
+  s.credentials = NewCredentials("xvz1evFS4wEEPTGEFPHBog",
+    "370773112-GmHxMAgYyLbNEtIKZeRNFsMKPR9EyMZeS9weJAEb",
+    "kAcSOqF21Fu85e7zjz7ZN2U4ZRhfV3WpwPAoE3Z7kBw", 
+    "LswwdoUaIvS8ltyTt5jkRh4J50vUPVVHtR2YPi5kE")
+  s.credentials.oauth_timestamp = 1318622958
+
+  s.method = "POST"
+  s.url = "https://api.twitter.com/1/statuses/update.json?include_entities=true"
+  s.form_value = make(FormValue)
+  s.form_value["status"] = "Hello Ladies + Gentlemen, a signed OAuth request!"
 }
 
 func (s *OAuthSuite) TestGenerateNonce(c *C) {
@@ -26,13 +41,40 @@ func (s *OAuthSuite) TestGenerateNonce(c *C) {
 func (s *OAuthSuite) TestNewCredentials(c *C) {
   oauth_consumer_key := "oauth_consumer_key"
   oauth_token := "oauth_token"
-  credentials := NewCredentials(oauth_consumer_key, oauth_token)
+  oauth_consumer_secret := "oauth_consumer_secret"
+  oauth_token_secret := "oauth_token_secret"
+  credentials := NewCredentials(oauth_consumer_key, oauth_token, oauth_consumer_secret, oauth_token_secret)
   
   c.Assert(credentials.oauth_consumer_key, Equals, oauth_consumer_key)
   c.Assert(credentials.oauth_token, Equals, oauth_token)
+  c.Assert(credentials.oauth_consumer_secret, Equals, oauth_consumer_secret)
+  c.Assert(credentials.oauth_token_secret, Equals, oauth_token_secret)
   c.Assert(credentials.oauth_signature_method, Equals, "HMAC-SHA1")
   c.Assert(credentials.oauth_version, Equals, "1.0")
   c.Assert(credentials.oauth_nonce, Not(Equals), "")
   c.Assert(credentials.oauth_timestamp, Not(Equals), 0)
 }
- 
+
+func (s *OAuthSuite) TestGenerateSignature(c *C) {
+
+  s.credentials.oauth_nonce = "kYjzVBB8Y0ZFabxSWbWovY3uYSQ2pTgmZeNu2VS4cg"
+
+  parameter_string := GenerateParameterString(&s.url, s.form_value, s.credentials)
+  c.Assert(*parameter_string, Equals, "include_entities=true&oauth_consumer_key=xvz1evFS4wEEPTGEFPHBog&oauth_nonce=kYjzVBB8Y0ZFabxSWbWovY3uYSQ2pTgmZeNu2VS4cg&oauth_signature_method=HMAC-SHA1&oauth_timestamp=1318622958&oauth_token=370773112-GmHxMAgYyLbNEtIKZeRNFsMKPR9EyMZeS9weJAEb&oauth_version=1.0&status=Hello%20Ladies%20%2B%20Gentlemen%2C%20a%20signed%20OAuth%20request%21")
+
+  signature_base_string := GenerateSignatureBaseString(&s.method, &s.url, parameter_string)
+  c.Assert(*signature_base_string, Equals, "POST&https%3A%2F%2Fapi.twitter.com%2F1%2Fstatuses%2Fupdate.json&include_entities%3Dtrue%26oauth_consumer_key%3Dxvz1evFS4wEEPTGEFPHBog%26oauth_nonce%3DkYjzVBB8Y0ZFabxSWbWovY3uYSQ2pTgmZeNu2VS4cg%26oauth_signature_method%3DHMAC-SHA1%26oauth_timestamp%3D1318622958%26oauth_token%3D370773112-GmHxMAgYyLbNEtIKZeRNFsMKPR9EyMZeS9weJAEb%26oauth_version%3D1.0%26status%3DHello%2520Ladies%2520%252B%2520Gentlemen%252C%2520a%2520signed%2520OAuth%2520request%2521")
+
+  signing_key := GenerateSigningKey(s.credentials)
+  c.Assert(*signing_key, Equals, "kAcSOqF21Fu85e7zjz7ZN2U4ZRhfV3WpwPAoE3Z7kBw&LswwdoUaIvS8ltyTt5jkRh4J50vUPVVHtR2YPi5kE")
+
+
+  signature := GenerateSignature(signature_base_string, signing_key)
+  c.Assert(*signature, Equals, "tnnArxj06cWHq44gCs1OSKk/jLY=")
+}
+
+
+
+
+
+
