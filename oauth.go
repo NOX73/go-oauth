@@ -12,6 +12,7 @@ import(
   "encoding/base64"
   "sort"
   "strconv"
+  "fmt"
 )
 
 type Credentials struct {
@@ -72,6 +73,10 @@ func (r *Request) GetSignature() string {
   return r.credentials.oauth_signature
 }
 
+func (r *Request) HttpRequest() *http.Request {
+  return &r.request
+}
+
 func NewRequest(method, url string, form_value FormValue, credentials *Credentials) (*Request, error) {
 
   parameter_string := GenerateParameterString(&url, form_value, credentials)
@@ -83,8 +88,11 @@ func NewRequest(method, url string, form_value FormValue, credentials *Credentia
 
   request := new(Request)
   request.credentials = credentials
+  r, error := GenerateHttpRequest(&method, &url, form_value, credentials)
 
-  return request, nil
+  request.request = *r
+
+  return request, error
 }
 
 func GenerateParameterString (str_url *string, form_value FormValue, credentials *Credentials) *string {
@@ -172,4 +180,27 @@ func GenerateSignature (signature_base_string, signing_key *string) *string{
   result := encoder.EncodeToString(h.Sum(nil))
 
   return &result
+}
+
+func GenerateHttpRequest(method, str_url *string, form_value FormValue, credentials *Credentials) (*http.Request, error) {
+  v := make(url.Values, len(form_value))
+
+  for key, val := range form_value {
+    v.Set(key, val)
+  }
+
+  r, error := http.NewRequest(*method, *str_url, strings.NewReader(v.Encode()))
+
+  auth_header := fmt.Sprintf(`OAuth oauth_consumer_key="%s", oauth_nonce="%s", oauth_signature="%s", oauth_signature_method="%s", oauth_timestamp="%d", oauth_token="%s", oauth_version="%s"`, 
+    credentials.oauth_consumer_key,
+    credentials.oauth_nonce,
+    url.QueryEscape(credentials.oauth_signature),
+    credentials.oauth_signature_method,
+    credentials.oauth_timestamp,
+    credentials.oauth_token,
+    credentials.oauth_version)
+
+  r.Header.Add("Authorization", auth_header)
+
+  return r, error
 }

@@ -4,8 +4,6 @@ import (
   . "launchpad.net/gocheck"
   "testing"
   //"fmt"
-  //"net/http"
-  //"strings"
 )
 
 // Hook up gocheck into the "go test" runner.
@@ -24,6 +22,7 @@ func (s *OAuthSuite) SetUpTest(c *C) {
     "kAcSOqF21Fu85e7zjz7ZN2U4ZRhfV3WpwPAoE3Z7kBw", 
     "LswwdoUaIvS8ltyTt5jkRh4J50vUPVVHtR2YPi5kE")
   s.credentials.oauth_timestamp = 1318622958
+  s.credentials.oauth_nonce = "kYjzVBB8Y0ZFabxSWbWovY3uYSQ2pTgmZeNu2VS4cg"
 
   s.method = "POST"
   s.url = "https://api.twitter.com/1/statuses/update.json?include_entities=true"
@@ -36,7 +35,6 @@ func (s *OAuthSuite) TestGenerateNonce(c *C) {
 
   c.Assert(len(nonce), Equals, 32)
 }
-
 
 func (s *OAuthSuite) TestNewCredentials(c *C) {
   oauth_consumer_key := "oauth_consumer_key"
@@ -57,7 +55,6 @@ func (s *OAuthSuite) TestNewCredentials(c *C) {
 
 func (s *OAuthSuite) TestGenerateSignature(c *C) {
 
-  s.credentials.oauth_nonce = "kYjzVBB8Y0ZFabxSWbWovY3uYSQ2pTgmZeNu2VS4cg"
 
   parameter_string := GenerateParameterString(&s.url, s.form_value, s.credentials)
   c.Assert(*parameter_string, Equals, "include_entities=true&oauth_consumer_key=xvz1evFS4wEEPTGEFPHBog&oauth_nonce=kYjzVBB8Y0ZFabxSWbWovY3uYSQ2pTgmZeNu2VS4cg&oauth_signature_method=HMAC-SHA1&oauth_timestamp=1318622958&oauth_token=370773112-GmHxMAgYyLbNEtIKZeRNFsMKPR9EyMZeS9weJAEb&oauth_version=1.0&status=Hello%20Ladies%20%2B%20Gentlemen%2C%20a%20signed%20OAuth%20request%21")
@@ -73,6 +70,11 @@ func (s *OAuthSuite) TestGenerateSignature(c *C) {
   c.Assert(*signature, Equals, "tnnArxj06cWHq44gCs1OSKk/jLY=")
 }
 
+func (s *OAuthSuite) TestNewRequest(c *C) {
+  request, _ := NewRequest(s.method, s.url, s.form_value, s.credentials)
+
+  c.Assert(request.HttpRequest().Header.Get("Authorization"), Equals, `OAuth oauth_consumer_key="xvz1evFS4wEEPTGEFPHBog", oauth_nonce="kYjzVBB8Y0ZFabxSWbWovY3uYSQ2pTgmZeNu2VS4cg", oauth_signature="tnnArxj06cWHq44gCs1OSKk%2FjLY%3D", oauth_signature_method="HMAC-SHA1", oauth_timestamp="1318622958", oauth_token="370773112-GmHxMAgYyLbNEtIKZeRNFsMKPR9EyMZeS9weJAEb", oauth_version="1.0"` )
+}
 
 
 
