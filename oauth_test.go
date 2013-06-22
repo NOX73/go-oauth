@@ -103,3 +103,9 @@ func (s *OAuthSuite) TestReal(c *C) {
   c.Assert(request.HttpRequest().Header.Get("Authorization"), Equals, `OAuth oauth_consumer_key="XjY7q0CYwRxSBzCpUeRDzQ", oauth_nonce="45cec5e082f5f4ac231352a49ffb535d", oauth_signature="qbgNEYVbXFy1968bb%2BMW4WtpNbM%3D", oauth_signature_method="HMAC-SHA1", oauth_timestamp="1371899669", oauth_token="214373359-jn77FNlrKEajR4Gpp9l5msb1KXCGXZ7QeJPtt5TF", oauth_version="1.0"` )
   c.Assert(string(body), Equals, "track=golang")
 }
+
+func (s *OAuthSuite) TestFormEncodedTest(c *C) {
+  request, _ := NewRequest(s.method, s.url, s.form_value, s.credentials)
+
+  c.Assert(request.HttpRequest().Header.Get("Content-Type"), Equals, "application/x-www-form-urlencoded")
+}

@@ -200,7 +200,10 @@ func GenerateHttpRequest(method, str_url *string, form_value FormValue, credenti
     credentials.oauth_token,
     credentials.oauth_version)
 
-  r.Header.Add("Authorization", auth_header)
+    r.Header.Add("Authorization", auth_header)
+    if len(v) > 0 {
+      r.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+    }
 
   return r, error
 }
