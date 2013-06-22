@@ -3,7 +3,9 @@ package oauth
 import (
   . "launchpad.net/gocheck"
   "testing"
+  //"net/http"
   //"fmt"
+  //"os"
 )
 
 // Hook up gocheck into the "go test" runner.
@@ -74,9 +76,30 @@ func (s *OAuthSuite) TestNewRequest(c *C) {
   request, _ := NewRequest(s.method, s.url, s.form_value, s.credentials)
 
   c.Assert(request.HttpRequest().Header.Get("Authorization"), Equals, `OAuth oauth_consumer_key="xvz1evFS4wEEPTGEFPHBog", oauth_nonce="kYjzVBB8Y0ZFabxSWbWovY3uYSQ2pTgmZeNu2VS4cg", oauth_signature="tnnArxj06cWHq44gCs1OSKk%2FjLY%3D", oauth_signature_method="HMAC-SHA1", oauth_timestamp="1318622958", oauth_token="370773112-GmHxMAgYyLbNEtIKZeRNFsMKPR9EyMZeS9weJAEb", oauth_version="1.0"` )
+
+  c.Assert(request.HttpRequest().ContentLength, Equals, int64(62))
 }
 
+func (s *OAuthSuite) TestReal(c *C) {
 
+  cr := NewCredentials("XjY7q0CYwRxSBzCpUeRDzQ",
+    "214373359-jn77FNlrKEajR4Gpp9l5msb1KXCGXZ7QeJPtt5TF",
+    "cuseCPmxY4taUEmouOhXIvR7MVSUWdRKjKHvHKgVvOk", 
+    "tO5hW1ye3myBnT78DspVbTKWFgadvKeU1EOiV3o5Tg")
+  cr.oauth_timestamp = 1371899669 
+  cr.oauth_nonce = "45cec5e082f5f4ac231352a49ffb535d"
 
+  method := "POST"
+  url := "https://stream.twitter.com/1.1/statuses/filter.json"
+  form_value := make(FormValue)
+  form_value["track"] = "golang"
 
+  request, _ := NewRequest(method, url, form_value, cr)
+  body := make([]byte, 12)
+  _, _ = request.HttpRequest().Body.Read(body)
 
+  //request.HttpRequest().Write(os.Stdout)
+
+  c.Assert(request.HttpRequest().Header.Get("Authorization"), Equals, `OAuth oauth_consumer_key="XjY7q0CYwRxSBzCpUeRDzQ", oauth_nonce="45cec5e082f5f4ac231352a49ffb535d", oauth_signature="qbgNEYVbXFy1968bb%2BMW4WtpNbM%3D", oauth_signature_method="HMAC-SHA1", oauth_timestamp="1371899669", oauth_token="214373359-jn77FNlrKEajR4Gpp9l5msb1KXCGXZ7QeJPtt5TF", oauth_version="1.0"` )
+  c.Assert(string(body), Equals, "track=golang")
+}
