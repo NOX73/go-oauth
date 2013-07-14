@@ -16,29 +16,29 @@ import(
 )
 
 type Credentials struct {
-  oauth_consumer_key string
-  oauth_nonce string
-  oauth_signature string
-  oauth_signature_method string
-  oauth_timestamp int64
-  oauth_token string
-  oauth_version string
+  OauthConsumerKey string
+  OauthNonce string
+  OauthSignature string
+  OauthSignatureMethod string
+  OauthTimestamp int64
+  OauthToken string
+  OauthVersion string
 
-  oauth_consumer_secret string
-  oauth_token_secret string
+  OauthConsumerSecret string
+  OauthTokenSecret string
 }
 
-func NewCredentials(oauth_consumer_key, oauth_token, oauth_consumer_secret, oauth_token_secret string) *Credentials{
+func NewCredentials(consumer_key, token, consumer_secret, token_secret string) *Credentials{
   c := Credentials{
-    oauth_consumer_key: oauth_consumer_key, 
-    oauth_token: oauth_token,
-    oauth_version: "1.0",
-    oauth_signature_method: "HMAC-SHA1",
-    oauth_nonce: GenerateNonce(),
-    oauth_timestamp: time.Now().UTC().Unix(),
+    OauthConsumerKey: consumer_key, 
+    OauthToken: token,
+    OauthVersion: "1.0",
+    OauthSignatureMethod: "HMAC-SHA1",
+    OauthNonce: GenerateNonce(),
+    OauthTimestamp: time.Now().UTC().Unix(),
 
-    oauth_consumer_secret: oauth_consumer_secret,
-    oauth_token_secret: oauth_token_secret,
+    OauthConsumerSecret: consumer_secret,
+    OauthTokenSecret: token_secret,
   }
   return &c
 }
@@ -70,7 +70,7 @@ type Request struct {
 }
 
 func (r *Request) GetSignature() string {
-  return r.credentials.oauth_signature
+  return r.credentials.OauthSignature
 }
 
 func (r *Request) HttpRequest() *http.Request {
@@ -84,7 +84,7 @@ func NewRequest(method, url string, form_value FormValue, credentials *Credentia
   signing_key := GenerateSigningKey(credentials)
   signature := GenerateSignature(signature_base_string, signing_key)
 
-  credentials.oauth_signature = *signature
+  credentials.OauthSignature = *signature
 
   request := new(Request)
   request.credentials = credentials
@@ -103,12 +103,12 @@ func GenerateParameterString (str_url *string, form_value FormValue, credentials
     v.Add(key, val) 
   }
 
-  v.Add("oauth_consumer_key", credentials.oauth_consumer_key) 
-  v.Add("oauth_nonce", credentials.oauth_nonce) 
-  v.Add("oauth_signature_method", credentials.oauth_signature_method) 
-  v.Add("oauth_timestamp", strconv.FormatInt(credentials.oauth_timestamp, 10))
-  v.Add("oauth_token", credentials.oauth_token) 
-  v.Add("oauth_version", credentials.oauth_version) 
+  v.Add("oauth_consumer_key", credentials.OauthConsumerKey) 
+  v.Add("oauth_nonce", credentials.OauthNonce) 
+  v.Add("oauth_signature_method", credentials.OauthSignatureMethod) 
+  v.Add("oauth_timestamp", strconv.FormatInt(credentials.OauthTimestamp, 10))
+  v.Add("oauth_token", credentials.OauthToken) 
+  v.Add("oauth_version", credentials.OauthVersion) 
 
   form_keys := make([]string, len(v))
 
@@ -162,9 +162,9 @@ func GenerateSignatureBaseString (method, str_url, parameter_string *string) *st
 func GenerateSigningKey (c *Credentials) *string {
   var buffer bytes.Buffer
 
-  buffer.WriteString(url.QueryEscape(c.oauth_consumer_secret))
+  buffer.WriteString(url.QueryEscape(c.OauthConsumerSecret))
   buffer.WriteString("&")
-  buffer.WriteString(url.QueryEscape(c.oauth_token_secret))
+  buffer.WriteString(url.QueryEscape(c.OauthTokenSecret))
 
   result := buffer.String()
 
@@ -192,13 +192,13 @@ func GenerateHttpRequest(method, str_url *string, form_value FormValue, credenti
   r, error := http.NewRequest(*method, *str_url, strings.NewReader(v.Encode()))
 
   auth_header := fmt.Sprintf(`OAuth oauth_consumer_key="%s", oauth_nonce="%s", oauth_signature="%s", oauth_signature_method="%s", oauth_timestamp="%d", oauth_token="%s", oauth_version="%s"`, 
-    credentials.oauth_consumer_key,
-    credentials.oauth_nonce,
-    url.QueryEscape(credentials.oauth_signature),
-    credentials.oauth_signature_method,
-    credentials.oauth_timestamp,
-    credentials.oauth_token,
-    credentials.oauth_version)
+    credentials.OauthConsumerKey,
+    credentials.OauthNonce,
+    url.QueryEscape(credentials.OauthSignature),
+    credentials.OauthSignatureMethod,
+    credentials.OauthTimestamp,
+    credentials.OauthToken,
+    credentials.OauthVersion)
 
     r.Header.Add("Authorization", auth_header)
     if len(v) > 0 {

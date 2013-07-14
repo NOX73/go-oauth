@@ -23,8 +23,8 @@ func (s *OAuthSuite) SetUpTest(c *C) {
     "370773112-GmHxMAgYyLbNEtIKZeRNFsMKPR9EyMZeS9weJAEb",
     "kAcSOqF21Fu85e7zjz7ZN2U4ZRhfV3WpwPAoE3Z7kBw", 
     "LswwdoUaIvS8ltyTt5jkRh4J50vUPVVHtR2YPi5kE")
-  s.credentials.oauth_timestamp = 1318622958
-  s.credentials.oauth_nonce = "kYjzVBB8Y0ZFabxSWbWovY3uYSQ2pTgmZeNu2VS4cg"
+  s.credentials.OauthTimestamp = 1318622958
+  s.credentials.OauthNonce = "kYjzVBB8Y0ZFabxSWbWovY3uYSQ2pTgmZeNu2VS4cg"
 
   s.method = "POST"
   s.url = "https://api.twitter.com/1/statuses/update.json?include_entities=true"
@@ -45,14 +45,14 @@ func (s *OAuthSuite) TestNewCredentials(c *C) {
   oauth_token_secret := "oauth_token_secret"
   credentials := NewCredentials(oauth_consumer_key, oauth_token, oauth_consumer_secret, oauth_token_secret)
   
-  c.Assert(credentials.oauth_consumer_key, Equals, oauth_consumer_key)
-  c.Assert(credentials.oauth_token, Equals, oauth_token)
-  c.Assert(credentials.oauth_consumer_secret, Equals, oauth_consumer_secret)
-  c.Assert(credentials.oauth_token_secret, Equals, oauth_token_secret)
-  c.Assert(credentials.oauth_signature_method, Equals, "HMAC-SHA1")
-  c.Assert(credentials.oauth_version, Equals, "1.0")
-  c.Assert(credentials.oauth_nonce, Not(Equals), "")
-  c.Assert(credentials.oauth_timestamp, Not(Equals), 0)
+  c.Assert(credentials.OauthConsumerKey, Equals, oauth_consumer_key)
+  c.Assert(credentials.OauthToken, Equals, oauth_token)
+  c.Assert(credentials.OauthConsumerSecret, Equals, oauth_consumer_secret)
+  c.Assert(credentials.OauthTokenSecret, Equals, oauth_token_secret)
+  c.Assert(credentials.OauthSignatureMethod, Equals, "HMAC-SHA1")
+  c.Assert(credentials.OauthVersion, Equals, "1.0")
+  c.Assert(credentials.OauthNonce, Not(Equals), "")
+  c.Assert(credentials.OauthTimestamp, Not(Equals), 0)
 }
 
 func (s *OAuthSuite) TestGenerateSignature(c *C) {
@@ -86,8 +86,8 @@ func (s *OAuthSuite) TestReal(c *C) {
     "214373359-jn77FNlrKEajR4Gpp9l5msb1KXCGXZ7QeJPtt5TF",
     "cuseCPmxY4taUEmouOhXIvR7MVSUWdRKjKHvHKgVvOk", 
     "tO5hW1ye3myBnT78DspVbTKWFgadvKeU1EOiV3o5Tg")
-  cr.oauth_timestamp = 1371899669 
-  cr.oauth_nonce = "45cec5e082f5f4ac231352a49ffb535d"
+  cr.OauthTimestamp = 1371899669 
+  cr.OauthNonce = "45cec5e082f5f4ac231352a49ffb535d"
 
   method := "POST"
   url := "https://stream.twitter.com/1.1/statuses/filter.json"
